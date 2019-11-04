@@ -10,7 +10,7 @@
 <center>
 <h1>Apple II video ROM decoder</h1>
 <input type="file" id="files" name="files[]" />
-<output id="list"><br><center><b>Select an Apple II ROM file to be displayed (4K or 8K ROM image).</b></center></output>
+<output id="list"><br><center><b>Select an Apple II video ROM file to be displayed (2K, 4K or 8K video ROMs).</b></center></output>
 <br>
 <canvas id="rom" width="576" height="288"></canvas>
 </center>
@@ -72,7 +72,7 @@ function showData(Data)
   }
   else
   {
-     document.getElementById('list').innerHTML = '<ul>' +'Given file does not have the size matching an Apple II video ROM image.'+ '</ul>';
+     document.getElementById('list').innerHTML = "<ul><font color='red'>Selected file's size does not match the size of any Apple II video ROM.</font></ul>";
   }
 }
 
