@@ -1,0 +1,88 @@
+<html>
+<!-- Apple II video ROM decoder.
+     Allows to display Apple II video ROM images, which are usually 8K or 4K large.
+     Copyright 2019 by Thorsten Brehm, brehmt at gmail com
+-->
+<head>
+<title>Apple II video ROM decoder</title>
+</head>
+<body>
+<center>
+<h1>Apple II video ROM decoder</h1>
+<input type="file" id="files" name="files[]" />
+<output id="list"><br><center><b>Select an Apple II ROM file to be displayed (4K or 8K ROM image).</b></center></output>
+<br>
+<canvas id="rom" width="576" height="288"></canvas>
+</center>
+
+<script>
+var c = document.getElementById("rom");
+var ctx = c.getContext("2d");
+ctx.fillStyle = "#000000";
+ctx.fillRect(0, 0, c.width, c.height);
+
+var CharsPerLine = 32;//64;
+
+function showData(Data)
+{
+  // Apple II character ROM files are 4K or 8K large.
+  // The US charsets have 4K.
+  // The charsets for foreign (European) languages have 8K, since they contain
+  // two sets (the US charset and the local charset. The European Apple II's were equipped with a little
+  // switch at the bottom of the keyboard area, which allowed to switch the charsets (this only switched
+  // the extra address line of the European 8K ROMs, so the video output was immediately switched to the
+  // new charset).
+  if ((Data.length==8192)||(Data.length==4096))
+  {
+     ctx.canvas.height = 2*9*Math.floor(Data.length/8/CharsPerLine);
+     ctx.fillStyle = "#000000";
+     ctx.fillRect(0, 0, c.width, c.height);
+     ctx.fillStyle = "#00c000";
+
+     for (var i=0;i<Data.length;i++)
+     {
+       // process byte per byte
+       var b = Data.charCodeAt(i);
+       var x=9*(Math.floor(i/8) % CharsPerLine);
+       var y=(i%8)+9*Math.floor(i/8/CharsPerLine);
+
+       for (var bit=0;bit<8;bit=bit+1)
+       {
+          if ((b & (1<<bit)) > 0)
+          {
+            ctx.fillRect((x+bit)*2, y*2, 2, 2);
+          }
+       }
+     }
+  }
+  else
+  {
+     document.getElementById('list').innerHTML = '<ul>' +'Given file does not have the size matching an Apple II video ROM image.'+ '</ul>';
+  }
+}
+
+function handleFileSelect(evt)
+{
+  var files = evt.target.files;
+  var output = [];
+  for (var i = 0, f; f = files[i]; i++)
+  {
+    output.push('ROM size: ', f.size, ' bytes');
+    var reader = new FileReader();
+    reader.onload = (function(theFile) {
+      return function(e) {
+        showData(e.target.result);
+      };
+    })(f);
+
+    // Read the ROM file as binary data.
+    reader.readAsBinaryString(f);
+  }
+
+  document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+}
+
+document.getElementById('files').addEventListener('change', handleFileSelect, false);
+</script>
+</body>
+</html>
