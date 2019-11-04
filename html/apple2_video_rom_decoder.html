@@ -21,19 +21,21 @@ var ctx = c.getContext("2d");
 ctx.fillStyle = "#000000";
 ctx.fillRect(0, 0, c.width, c.height);
 
-var CharsPerLine = 32;//64;
+var CharsPerLine = 32;
 
 function showData(Data)
 {
-  // Apple II character ROM files are 4K or 8K large.
-  // The US charsets have 4K.
+  // Apple II character ROMs are 2KB large. 
+  // Apple IIe character ROM files are 4KB or 8KB large.
+  // The US charsets have 4KB.
   // The charsets for foreign (European) languages have 8K, since they contain
   // two sets (the US charset and the local charset. The European Apple II's were equipped with a little
   // switch at the bottom of the keyboard area, which allowed to switch the charsets (this only switched
   // the extra address line of the European 8K ROMs, so the video output was immediately switched to the
   // new charset).
-  if ((Data.length==8192)||(Data.length==4096))
+  if ((Data.length==8192)||(Data.length==4096)||(Data.length==2048))
   {
+     var Reversed = (Data.length==2048); // Apple II ROMs of 2KB have reversed bit order
      ctx.canvas.height = 2*9*Math.floor(Data.length/8/CharsPerLine);
      ctx.fillStyle = "#000000";
      ctx.fillRect(0, 0, c.width, c.height);
@@ -46,12 +48,25 @@ function showData(Data)
        var x=9*(Math.floor(i/8) % CharsPerLine);
        var y=(i%8)+9*Math.floor(i/8/CharsPerLine);
 
-       for (var bit=0;bit<8;bit=bit+1)
+       if (Reversed)
        {
-          if ((b & (1<<bit)) > 0)
-          {
-            ctx.fillRect((x+bit)*2, y*2, 2, 2);
-          }
+         for (var bit=0;bit<8;bit=bit+1)
+         {
+            if ((b & (1<<bit)) > 0)
+            {
+              ctx.fillRect((x+7-bit)*2, y*2, 2, 2);
+            }
+         }
+       }
+       else
+       {
+         for (var bit=0;bit<8;bit=bit+1)
+         {
+            if ((b & (1<<bit)) > 0)
+            {
+              ctx.fillRect((x+bit)*2, y*2, 2, 2);
+            }
+         }
        }
      }
   }
