@@ -12,16 +12,20 @@
 <input type="file" id="files" name="files[]" />
 <output id="list"><br><center><b>Select an Apple II video ROM file to be displayed (2K, 4K or 8K video ROMs).</b></center></output>
 <br>
-<canvas id="rom" width="576" height="288"></canvas>
+<canvas id="rom" width="576" height="288" style="background: url('Apple_IIe_video_ROM.png')"></canvas>
 </center>
 
 <script>
 var c = document.getElementById("rom");
 var ctx = c.getContext("2d");
+ctx.globalAlpha = 0;
 ctx.fillStyle = "#000000";
 ctx.fillRect(0, 0, c.width, c.height);
 
+var Factor = 2;
+var PixelColor = "#00c000";//"#ffffff";
 var CharsPerLine = 32;
+var SpacingPixels = 0;
 
 function showData(Data)
 {
@@ -36,25 +40,26 @@ function showData(Data)
   if ((Data.length==8192)||(Data.length==4096)||(Data.length==2048))
   {
      var Reversed = (Data.length==2048); // Apple II ROMs of 2KB have reversed bit order
-     ctx.canvas.height = 2*9*Math.floor(Data.length/8/CharsPerLine);
+     ctx.canvas.height = Factor*(8+SpacingPixels)*Math.floor(Data.length/8/CharsPerLine);
+     ctx.canvas.width = Factor*(8+SpacingPixels)*CharsPerLine;
      ctx.fillStyle = "#000000";
      ctx.fillRect(0, 0, c.width, c.height);
-     ctx.fillStyle = "#00c000";
+     ctx.fillStyle = PixelColor;
 
      for (var i=0;i<Data.length;i++)
      {
        // process byte per byte
        var b = Data.charCodeAt(i);
-       var x=9*(Math.floor(i/8) % CharsPerLine);
-       var y=(i%8)+9*Math.floor(i/8/CharsPerLine);
+       var x=(8+SpacingPixels)*(Math.floor(i/8) % CharsPerLine);
+       var y=(i%8)+(8+SpacingPixels)*Math.floor(i/8/CharsPerLine);
 
        if (Reversed)
        {
          for (var bit=0;bit<8;bit=bit+1)
          {
-            if ((b & (1<<bit)) > 0)
+            if ((b & (1<<bit)) != 0)
             {
-              ctx.fillRect((x+7-bit)*2, y*2, 2, 2);
+              ctx.fillRect((x+7-bit)*Factor, y*Factor, Factor, Factor);
             }
          }
        }
@@ -62,9 +67,9 @@ function showData(Data)
        {
          for (var bit=0;bit<8;bit=bit+1)
          {
-            if ((b & (1<<bit)) > 0)
+            if ((b & (1<<bit)) == 0)
             {
-              ctx.fillRect((x+bit)*2, y*2, 2, 2);
+              ctx.fillRect((x+bit)*Factor, y*Factor, Factor, Factor);
             }
          }
        }
